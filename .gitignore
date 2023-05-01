@@ -1,0 +1,5 @@
+**.pyc
+
+# IDE configuration files
+.idea
+.vscode
