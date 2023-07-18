@@ -16,14 +16,12 @@ class MpqEntry:
         self.encryption_seed = 0
         self._file_offset = 0
         self.file_pos = 0
-        self._filename = ''
+        self.filename = ''
 
     def set_filename(self, filename):
-        self._filename = filename
+        self.filename = filename
         self.encryption_seed = self.calculate_encryption_seed()
-
-    def get_filename(self):
-        return self._filename
+        self.filename = self.filename.rsplit("\\")[-1]
 
     def is_encrypted(self):
         return self.flags & MpqFlags.Encrypted
@@ -38,9 +36,9 @@ class MpqEntry:
         return self.flags & MpqFlags.SingleUnit
 
     def calculate_encryption_seed(self):
-        if not self._filename:
+        if not self.filename:
             return 0
-        seed = self.mpq_archive.hash_string(self._filename, 0x300)
+        seed = self.mpq_archive.hash_string(self.filename, 0x300)
         if self.flags & MpqFlags.BlockOffsetAdjustedKey:
             seed = ((seed + self._file_offset) ^ self.file_size) & 0xffffffff
         return seed
