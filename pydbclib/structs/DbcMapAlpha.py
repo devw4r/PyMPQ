@@ -17,6 +17,12 @@ class DbcMapAlpha:
     name_en_tw: str
     mask: int
 
+    def get_name(self):
+        return self.name_en_us
+
+    def get_wdt_name(self):
+        return self.name_en_us + '.wdt.MPQ'
+
     @staticmethod
     def from_bytes(dbc_reader):
         id_ = dbc_reader.read_int()
