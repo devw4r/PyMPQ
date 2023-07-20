@@ -1,14 +1,17 @@
 import os
+from io import BytesIO
 from struct import unpack
+from typing import Optional
 
 from pydbclib.structs.DbcHeader import DbcHeader
 
 
 class DbcReader:
-    def __init__(self, filename):
+    def __init__(self, filename=None, buffer=None):
         self.filename = filename
+        self.buffer = buffer
         self.reader = None
-        self.header: DbcHeader = None
+        self.header: Optional[DbcHeader] = None
 
     def __enter__(self):
         self.initialize()
@@ -19,10 +22,16 @@ class DbcReader:
             self.reader.close()
 
     def initialize(self):
-        if not os.path.exists(self.filename):
+        if not self.buffer and not os.path.exists(self.filename):
             return False
-        self.reader = open(self.filename, 'rb')
+        self.reader = open(self.filename, 'rb') if self.filename else BytesIO(self.buffer)
         self.header = DbcHeader.from_bytes(self.reader)
+
+    def read_records_by_type(self, object_type):
+        records = []
+        for r in range(self.header.record_count):
+            records.append(self.read(object_type))
+        return records
 
     def read(self, object_type):
         return object_type.from_bytes(self)

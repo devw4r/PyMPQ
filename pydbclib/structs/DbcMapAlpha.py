@@ -1,9 +1,8 @@
 from dataclasses import dataclass
-from struct import unpack
 
 
 @dataclass
-class DbcMap:
+class DbcMapAlpha:
     id: int
     directory: str
     pvp: int
@@ -34,5 +33,5 @@ class DbcMap:
         name_en_tw = dbc_reader.read_string()
         mask = dbc_reader.read_int()
 
-        return DbcMap(id_, directory, pvp, is_in_map, name_en_us, name_en_gb, name_ko_kr, name_fr_fr, name_de_de,
-                      name_en_cn, name_zh_ch, name_en_tw, mask)
+        return DbcMapAlpha(id_, directory, pvp, is_in_map, name_en_us, name_en_gb, name_ko_kr, name_fr_fr, name_de_de,
+                           name_en_cn, name_zh_ch, name_en_tw, mask)

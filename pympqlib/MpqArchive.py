@@ -79,6 +79,13 @@ class MpqArchive:
 
         return True
 
+    def find_file(self, name):
+        for entry in self.mpq_entries:
+            if entry.filename.lower() != name.lower():
+                continue
+            return entry
+        return None
+
     def read_file_bytes(self, mpq_entry):
         with MpqReader(self, mpq_entry) as mpq_reader:
             return mpq_reader.data
