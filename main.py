@@ -9,9 +9,11 @@ from definitions.enums.CustomErrors import CustomErrors
 
 ROOT_PATH = ''
 DATA_FOLDER = 'Data'
+MAPS_FOLDER = 'World/Maps'
 DBC_NEEDED = 'dbc.MPQ'
 DBC_PATH = ''
 DATA_PATH = ''
+MAPS_PATH = ''
 DBC_MAPS = []
 
 if __name__ == '__main__':
@@ -41,6 +43,11 @@ if __name__ == '__main__':
         print(f'Unable to locate {DBC_PATH}.')
         exit(CustomErrors.NO_DBC_PATH_FOUND)
 
+    MAPS_PATH = os.path.join(DATA_PATH, MAPS_FOLDER)
+    if not os.path.exists(DBC_PATH):
+        print(f'Unable to locate {MAPS_FOLDER}.')
+        exit(CustomErrors.NO_DBC_PATH_FOUND)
+
     # Extract available maps at Map.dbc.
     with MpqArchive(DBC_PATH) as archive:
         map_dbc = archive.find_file('Map.dbc')
@@ -53,8 +60,20 @@ if __name__ == '__main__':
 
     # Validate we have maps.
     if not DBC_MAPS:
-        print(f'Unable to extract maps from {DBC_PATH}.')
+        print(f'Unable to read maps from {DBC_PATH}.')
         exit(CustomErrors.NO_DBC_MAPS_LOCATED)
     else:
         print(f'Found {len(DBC_MAPS)} dbc maps.')
+
+    # Interested in ADT based maps, not WMO based.
+    for dbc_map in DBC_MAPS:
+        if not dbc_map.is_in_map:
+            continue
+        dbc_map_path = os.path.join(os.path.join(MAPS_PATH, dbc_map.get_name()), dbc_map.get_wdt_name())
+        if not os.path.exists(dbc_map_path):
+            print(f'Unable to locate {dbc_map_path}.')
+            exit(CustomErrors.NO_WDT_FOUND)
+
+        print(dbc_map.name_en_us)
+
 
