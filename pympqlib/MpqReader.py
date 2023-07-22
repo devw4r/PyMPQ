@@ -12,7 +12,7 @@ class MpqReader:
         self.block_size = mpq_archive.block_size
         self.current_block_index = -1
         self._position = 0
-        self.data = b''
+        self.data = bytearray()
         self.length = mpq_entry.file_size
         self._fill()
 
@@ -38,7 +38,7 @@ class MpqReader:
         if self.mpq_entry.is_single_unit():
             return self._read_single_unit()
 
-        to_read = self.buffer_size
+        to_read = self.length
         read_total = 0
 
         while to_read > 0:
@@ -65,9 +65,9 @@ class MpqReader:
         if required_block != self.current_block_index:
             expected_length = int(min(self.length - (required_block * self.block_size), self.block_size))
             block_data = self._load_block(required_block, expected_length)
-            self.data += block_data
+            self.data.extend(block_data)
             self.current_block_index = required_block
-            self._position = len(self.data)
+            self._position += expected_length
             return len(block_data)
         return 0
 
@@ -102,31 +102,31 @@ class MpqReader:
         return data
 
     def _decompress_multi(self, data, expected_length):
-        stream = BytesIO(data)
-        comp_type = ord(stream.read(1))
+        with BytesIO(data) as stream:
+            comp_type = ord(stream.read(1))
 
-        if comp_type == 1:  # Huffman:
-            pass
-        elif comp_type == 2:  # ZLib/Deflate
-            return zlib.decompress(stream.read(), bufsize=expected_length)
-        elif comp_type == 8:  # PKLib / Impode
-            pass
-        elif comp_type == 0x10:  # BZip2
-            pass
-        elif comp_type == 0x80:  # IMA ADPCM Stereo
-            pass
-        elif comp_type == 0x40:  # IMA ADPCM Mono
-            pass
-        elif comp_type == 0x12:  # LZMA
-            pass
-        elif comp_type == 0x22:  # Sparse then ZLib.
-            pass
-        elif comp_type == 0x30:  # Sparse then BZip2.
-            pass
-        elif comp_type == 0x41:  #  Huffman then Wav.
-            pass
-        elif comp_type == 0x48:  #  PKLib then Wav.
-            pass
+            if comp_type == 1:  # Huffman:
+                pass
+            elif comp_type == 2:  # ZLib/Deflate
+                return zlib.decompress(stream.read(), bufsize=expected_length)
+            elif comp_type == 8:  # PKLib / Impode
+                pass
+            elif comp_type == 0x10:  # BZip2
+                pass
+            elif comp_type == 0x80:  # IMA ADPCM Stereo
+                pass
+            elif comp_type == 0x40:  # IMA ADPCM Mono
+                pass
+            elif comp_type == 0x12:  # LZMA
+                pass
+            elif comp_type == 0x22:  # Sparse then ZLib.
+                pass
+            elif comp_type == 0x30:  # Sparse then BZip2.
+                pass
+            elif comp_type == 0x41:  # Huffman then Wav.
+                pass
+            elif comp_type == 0x48:  # PKLib then Wav.
+                pass
 
     def _read_single_unit(self):
         return

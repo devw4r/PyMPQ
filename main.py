@@ -1,6 +1,7 @@
 import os
 import sys
 
+from definitions.Wdt import Wdt
 from pydbclib.DbcReader import DbcReader
 from pympqlib.MpqArchive import MpqArchive
 from pydbclib.structs.DbcMapAlpha import DbcMapAlpha
@@ -74,6 +75,6 @@ if __name__ == '__main__':
             print(f'Unable to locate {dbc_map_path}.')
             exit(CustomErrors.NO_WDT_FOUND)
 
-        print(dbc_map.name_en_us)
-
-
+        with MpqArchive(dbc_map_path) as wdt_reader:
+            wdt = Wdt(dbc_map, wdt_reader)
+            wdt.parse()
