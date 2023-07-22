@@ -9,4 +9,5 @@ class CustomErrors(IntEnum):
     UNABLE_TO_EXTRACT_MAP_DBC = 5
     NO_DBC_MAPS_LOCATED = 6
     NO_WDT_FOUND = 7
-
+    INVALID_DECOMPRESS_METHOD = 8
+    INVALID_METHOD = 9

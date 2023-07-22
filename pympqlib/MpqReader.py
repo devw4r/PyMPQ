@@ -1,5 +1,8 @@
 from io import BytesIO
 import zlib
+from struct import unpack
+
+from definitions.enums.CustomErrors import CustomErrors
 
 
 class MpqReader:
@@ -8,7 +11,6 @@ class MpqReader:
         self.stream = mpq_archive.stream
         self.entry_stream = None
         self.mpq_entry = mpq_entry
-        self.buffer_size = 0x40000
         self.block_size = mpq_archive.block_size
         self.current_block_index = -1
         self._position = 0
@@ -36,7 +38,8 @@ class MpqReader:
 
     def _fill(self):
         if self.mpq_entry.is_single_unit():
-            return self._read_single_unit()
+            print('Unsupported method.')
+            exit(CustomErrors.INVALID_METHOD)
 
         to_read = self.length
         read_total = 0
@@ -95,38 +98,18 @@ class MpqReader:
 
         if self.mpq_entry.is_compressed() and to_read != expected_length:
             if self.mpq_entry.is_compressed_multi():
-                data = self._decompress_multi(data, expected_length)
+                data = MpqReader.decompress_multi(data, expected_length)
             else:
-                data = self._pk_decompress(data, expected_length)
+                print('Unsupported PK decompress')
+                exit(CustomErrors.INVALID_DECOMPRESS_METHOD)
 
         return data
 
-    def _decompress_multi(self, data, expected_length):
-        with BytesIO(data) as stream:
-            comp_type = ord(stream.read(1))
-
-            if comp_type == 1:  # Huffman:
-                pass
-            elif comp_type == 2:  # ZLib/Deflate
-                return zlib.decompress(stream.read(), bufsize=expected_length)
-            elif comp_type == 8:  # PKLib / Impode
-                pass
-            elif comp_type == 0x10:  # BZip2
-                pass
-            elif comp_type == 0x80:  # IMA ADPCM Stereo
-                pass
-            elif comp_type == 0x40:  # IMA ADPCM Mono
-                pass
-            elif comp_type == 0x12:  # LZMA
-                pass
-            elif comp_type == 0x22:  # Sparse then ZLib.
-                pass
-            elif comp_type == 0x30:  # Sparse then BZip2.
-                pass
-            elif comp_type == 0x41:  # Huffman then Wav.
-                pass
-            elif comp_type == 0x48:  # PKLib then Wav.
-                pass
-
-    def _read_single_unit(self):
-        return
+    @staticmethod
+    def decompress_multi(data, expected_length):
+        compression_type = unpack('<B', data[:1])[0]
+        if compression_type == 2:  # ZLib/Deflate
+            return zlib.decompress(data[1:], bufsize=expected_length)
+        else:
+            print('Unsupported decompress method.')
+            exit(CustomErrors.INVALID_DECOMPRESS_METHOD)

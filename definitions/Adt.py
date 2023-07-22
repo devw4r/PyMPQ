@@ -8,6 +8,7 @@ class Adt:
         self.adt_x = x
         self.adt_y = y
         self.chunks_information = [[type[TileHeader] for _ in range(16)] for _ in range(16)]
+        self.adt_tiles = [[type[TileInformation] for _ in range(16)] for _ in range(16)]
 
     @staticmethod
     def from_reader(tile_info: TileHeader, adt_x, adt_y, stream_reader):
@@ -22,7 +23,7 @@ class Adt:
             return
 
         # Discard.
-        stream_reader.read_bytes(size)
+        stream_reader.move_forward(size)
 
         token, size = stream_reader.read_chunk_information()
         # 16x16 chunk map.
@@ -41,7 +42,7 @@ class Adt:
             return
 
         # Discard.
-        stream_reader.read_bytes(size)
+        stream_reader.move_forward(size)
 
         token, size = stream_reader.read_chunk_information()
         # 16x16 chunk map.
@@ -50,7 +51,7 @@ class Adt:
             return
 
         # Discard.
-        stream_reader.read_bytes(size)
+        stream_reader.move_forward(size)
 
         token, size = stream_reader.read_chunk_information()
         # 16x16 chunk map.
@@ -59,7 +60,7 @@ class Adt:
             return
 
         # Discard.
-        stream_reader.read_bytes(size)
+        stream_reader.move_forward(size)
 
         for x in range(Constants.TILE_SIZE):
             for y in range(Constants.TILE_SIZE):
@@ -68,10 +69,6 @@ class Adt:
                 if 'MCNK' not in token:
                     print(f'Invalid Token')
                     return
-                tile_info = TileInformation.from_reader(stream_reader)
+                adt.adt_tiles[x][y] = TileInformation.from_reader(stream_reader)
 
         return adt
-
-
-
-

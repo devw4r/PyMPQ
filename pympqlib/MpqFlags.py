@@ -1,5 +1,6 @@
 from enum import IntEnum
 
+
 class MpqFlags(IntEnum):
     CompressedPK = 0x100
     CompressedMulti = 0x200

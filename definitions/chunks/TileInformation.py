@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-
 from definitions.chunks.MCVT import MCVT
 
 
@@ -16,15 +15,15 @@ class TileInformation:
     def from_reader(stream_reader):
         flags = stream_reader.read_int()
         has_liquids = flags & (0x4 | 0x8 | 0x10)
-        stream_reader.read_bytes(20)
+        stream_reader.move_forward(20)
         offs_height = stream_reader.read_int()
-        stream_reader.read_bytes(28)
+        stream_reader.move_forward(28)
         area_number = stream_reader.read_int()
-        stream_reader.read_bytes(4)
+        stream_reader.move_forward(4)
         holes_low_mask = stream_reader.read_uint16()
-        stream_reader.read_bytes(34)
+        stream_reader.move_forward(34)
         offs_liquids = stream_reader.read_int()
-        stream_reader.read_bytes(24)
+        stream_reader.move_forward(24)
         header_offset = stream_reader.get_position()
 
         # Read MCVT.
@@ -35,4 +34,3 @@ class TileInformation:
             pass
 
         return TileInformation(flags, has_liquids, area_number, holes_low_mask, offs_liquids, mcvt)
-

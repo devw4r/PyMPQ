@@ -17,6 +17,9 @@ class StreamReader:
     def get_position(self):
         return self.stream.tell()
 
+    def move_forward(self, length):
+        self.stream.seek(self.get_position() + length)
+
     def read_bytes(self, length):
         return self.stream.read(length)
 

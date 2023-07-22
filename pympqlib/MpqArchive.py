@@ -11,7 +11,7 @@ from pympqlib.MpqReader import MpqReader
 class MpqArchive:
     def __init__(self, filename):
         self.filename = filename
-        self.storm_buffer = b''
+        self.storm_buffer = list()
         self.header = None
         self.block_size = 0
         self.stream = None
@@ -26,7 +26,8 @@ class MpqArchive:
         self.data = None
         if self.stream:
             self.stream.close()
-        self.storm_buffer = b''
+        if self.storm_buffer:
+            self.storm_buffer.clear()
         self.mpq_entries.clear()
         self.mpq_hashes.clear()
 
@@ -148,7 +149,7 @@ class MpqArchive:
 
     def build_storm_buffer(self):
         seed = 0x100001
-        result = [0 for x in range(0x500)]
+        result = [0 for _ in range(0x500)]
         for index1 in range(0, 0x100):
             index2 = index1
             for i in range(0, 5):

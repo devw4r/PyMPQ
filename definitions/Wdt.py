@@ -32,7 +32,7 @@ class Wdt:
             return
 
         # Discard.
-        self.stream_reader.read_bytes(size)
+        self.stream_reader.move_forward(size)
 
         token, size = self.stream_reader.read_chunk_information()
         if 'MAIN' not in token:
@@ -50,7 +50,7 @@ class Wdt:
             return
 
         # Discard.
-        self.stream_reader.read_bytes(size)
+        self.stream_reader.move_forward(size)
 
         token, size = self.stream_reader.read_chunk_information()
         if 'MONM' not in token:
@@ -58,13 +58,13 @@ class Wdt:
             return
 
         # Discard.
-        self.stream_reader.read_bytes(size)
+        self.stream_reader.move_forward(size)
 
         token, size = self.stream_reader.read_chunk_information()
         # Optional for WMO based.
         if 'MODF' in token:
             # Discard.
-            self.stream_reader.read_bytes(size)
+            self.stream_reader.move_forward(size)
 
         # ADT,
         if 'MHDR' not in token:
@@ -77,4 +77,6 @@ class Wdt:
                 if not tile_info or not tile_info.size:
                     continue
                 self.adt_data[x][y] = Adt.from_reader(tile_info, x, y, self.stream_reader)
+
+        print(len(self.adt_data))
 
