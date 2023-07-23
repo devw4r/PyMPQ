@@ -68,13 +68,13 @@ if __name__ == '__main__':
 
     # Interested in ADT based maps, not WMO based.
     for dbc_map in DBC_MAPS:
-        if not dbc_map.is_in_map:
+        dbc_map_path = dbc_map.get_wdt_path(root_path=MAPS_PATH)
+        if dbc_map.is_in_map:
             continue
-        dbc_map_path = os.path.join(os.path.join(MAPS_PATH, dbc_map.get_name()), dbc_map.get_wdt_name())
         if not os.path.exists(dbc_map_path):
-            print(f'Unable to locate {dbc_map_path}.')
-            exit(CustomErrors.NO_WDT_FOUND)
+            print(f'[WARNING] Map [{dbc_map.name}] does not exist as defined in Map.dbc, skipping.')
+            continue
 
         with MpqArchive(dbc_map_path) as wdt_reader:
-            wdt = Wdt(dbc_map, wdt_reader)
-            wdt.parse()
+            with Wdt(dbc_map, wdt_reader) as wdt:
+                wdt.process()

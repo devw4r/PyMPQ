@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass
 
 
@@ -7,7 +8,7 @@ class DbcMapAlpha:
     directory: str
     pvp: int
     is_in_map: int
-    name_en_us: str
+    name: str
     name_en_gb: str
     name_ko_kr: str
     name_fr_fr: str
@@ -17,11 +18,8 @@ class DbcMapAlpha:
     name_en_tw: str
     mask: int
 
-    def get_name(self):
-        return self.name_en_us
-
-    def get_wdt_name(self):
-        return self.name_en_us + '.wdt.MPQ'
+    def get_wdt_path(self, root_path):
+        return os.path.join(os.path.join(root_path, self.directory), self.name) + '.wdt.MPQ'
 
     @staticmethod
     def from_bytes(dbc_reader):

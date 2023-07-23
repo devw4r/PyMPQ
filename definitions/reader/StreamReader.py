@@ -5,7 +5,16 @@ class StreamReader:
     def __init__(self, stream):
         self.stream = stream
 
-    def read_chunk_information(self):
+    def close(self):
+        if self.stream:
+            self.stream.close()
+        self.stream = None
+
+    def read_chunk_information(self, forward=0, seek=0):
+        if seek:
+            self.set_position(seek)
+        if forward:
+            self.move_forward(forward)
         token = self.read_bytes(4)
         token_name = token.decode('utf8')[::-1]
         size = self.read_int()
@@ -31,5 +40,3 @@ class StreamReader:
 
     def read_float(self):
         return unpack('<f', self.stream.read(4))[0]
-
-
