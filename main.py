@@ -68,13 +68,14 @@ if __name__ == '__main__':
 
     # Interested in ADT based maps, not WMO based.
     for dbc_map in DBC_MAPS:
-        dbc_map_path = dbc_map.get_wdt_path(root_path=MAPS_PATH)
-        if dbc_map.is_in_map:
+        # Only main maps have heightfield.
+        if not dbc_map.is_in_map:
             continue
-        if not os.path.exists(dbc_map_path):
+        # Check if Map.dbc data points to a valid wdt file.
+        if not dbc_map.exists(root_path=MAPS_PATH):
             print(f'[WARNING] Map [{dbc_map.name}] does not exist as defined in Map.dbc, skipping.')
             continue
-
-        with MpqArchive(dbc_map_path) as wdt_reader:
+        # Process wdt.
+        with MpqArchive(dbc_map.get_wdt_path(root_path=MAPS_PATH)) as wdt_reader:
             with Wdt(dbc_map, wdt_reader) as wdt:
                 wdt.process()

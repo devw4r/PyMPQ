@@ -23,54 +23,49 @@ class Adt:
         pass
 
     @staticmethod
-    def from_reader(tile_info: TileHeader, adt_x, adt_y, stream_reader):
+    def from_reader(adt_x, adt_y, stream_reader):
         # Initialize adt object.
         adt = Adt(adt_x, adt_y)
 
-        token, size = stream_reader.read_chunk_information(seek=tile_info.offset)
-        # Area header.
-        if 'MHDR' not in token:
-            print(f'Invalid Token')
+        error, token, size = stream_reader.read_chunk_information('MHDR')
+        if error:
+            print(f'[WARNING] {error}')
             return
 
-        # Move to next token.
-        token, size = stream_reader.read_chunk_information(forward=size)
         # 16x16 chunk map.
-        if 'MCIN' not in token:
-            print(f'Invalid Token')
+        error, token, size = stream_reader.read_chunk_information('MCIN', skip=size)
+        if error:
+            print(f'[WARNING] {error}')
             return
 
         for x in range(Constants.TILE_SIZE):
             for y in range(Constants.TILE_SIZE):
                 adt.chunks_information[x][y] = TileHeader.from_reader(stream_reader)
 
-        token, size = stream_reader.read_chunk_information()
-        # 16x16 chunk map.
-        if 'MTEX' not in token:
-            print(f'Invalid Token')
+        error, token, size = stream_reader.read_chunk_information('MTEX')
+        if error:
+            print(f'[WARNING] {error}')
             return
 
-        # Move to next token.
-        token, size = stream_reader.read_chunk_information(forward=size)
-        # 16x16 chunk map.
-        if 'MDDF' not in token:
-            print(f'Invalid Token')
+        # Move to next token. (Optional)
+        error, token, size = stream_reader.read_chunk_information('MDDF', skip=size)
+        if error:
+            print(f'[WARNING] {error}')
             return
 
-        # Move to next token.
-        token, size = stream_reader.read_chunk_information(forward=size)
-        # 16x16 chunk map.
-        if 'MODF' not in token:
-            print(f'Invalid Token')
+        # Move to next token. (Optional)
+        error, token, size = stream_reader.read_chunk_information('MODF', skip=size)
+        if error:
+            print(f'[WARNING] {error}')
             return
 
         # ADT data.
         for x in range(Constants.TILE_SIZE):
             for y in range(Constants.TILE_SIZE):
                 stream_reader.set_position(adt.chunks_information[x][y].offset)
-                token, size = stream_reader.read_chunk_information()
-                if 'MCNK' not in token:
-                    print(f'Invalid Token')
+                error, token, size = stream_reader.read_chunk_information('MCNK')
+                if error:
+                    print(f'[WARNING] {error}')
                     return
                 adt.adt_tiles[x][y] = TileInformation.from_reader(stream_reader)
 

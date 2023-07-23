@@ -18,6 +18,9 @@ class DbcMapAlpha:
     name_en_tw: str
     mask: int
 
+    def exists(self, root_path):
+        return os.path.exists(self.get_wdt_path(root_path))
+
     def get_wdt_path(self, root_path):
         return os.path.join(os.path.join(root_path, self.directory), self.name) + '.wdt.MPQ'
 

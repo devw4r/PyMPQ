@@ -12,5 +12,5 @@ class TileHeader:
         offset = stream_reader.read_int()
         size = stream_reader.read_int()
         flags = stream_reader.read_int()
-        stream_reader.read_bytes(4)  # Padding.
+        stream_reader.move_forward(4)  # Padding.
         return TileHeader(offset, size, flags)

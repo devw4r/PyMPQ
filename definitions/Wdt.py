@@ -32,9 +32,9 @@ class Wdt:
         self.adt_data = None
 
     def process(self):
-        token, size = self.stream_reader.read_chunk_information()
-        if 'MVER' not in token:
-            print('Invalid Token')
+        error, token, size = self.stream_reader.read_chunk_information('MVER')
+        if error:
+            print(f'[WARNING] {error}')
             return
 
         self.adt_version = self.stream_reader.read_int()
@@ -42,15 +42,15 @@ class Wdt:
             print('Wrong ADT version.')
             return
 
-        token, size = self.stream_reader.read_chunk_information()
-        if 'MPHD' not in token:
-            print('Invalid Token')
+        error, token, size = self.stream_reader.read_chunk_information('MPHD')
+        if error:
+            print(f'[WARNING] {error}')
             return
 
         # Move to next token.
-        token, size = self.stream_reader.read_chunk_information(forward=size)
-        if 'MAIN' not in token:
-            print(f'Invalid Token')
+        error, token, size = self.stream_reader.read_chunk_information('MAIN', skip=size)
+        if error:
+            print(f'[WARNING] {error}')
             return
 
         # Tiles information.
@@ -58,29 +58,22 @@ class Wdt:
             for y in range(64):
                 self.tile_information[x][y] = TileHeader.from_reader(self.stream_reader)
 
-        token, size = self.stream_reader.read_chunk_information()
-        if 'MDNM' not in token:
-            print(f'Invalid Token')
+        error, token, size = self.stream_reader.read_chunk_information('MDNM')
+        if error:
+            print(f'[WARNING] {error}')
             return
 
         # Move to next token.
-        token, size = self.stream_reader.read_chunk_information(forward=size)
-        if 'MONM' not in token:
-            print(f'Invalid Token')
-            return
-        elif not size:
-            print(f'Map [{self.dbc_map.name}] does not contain tile data, skipping.')
+        error, token, size = self.stream_reader.read_chunk_information('MONM', skip=size)
+        if error:
+            print(f'[WARNING] {error}')
             return
 
         # Move to next token.
-        token, size = self.stream_reader.read_chunk_information(forward=size)
+        error, token, size = self.stream_reader.read_chunk_information('MODF', skip=size)
         # Optional for WMO based.
-        if 'MODF' in token:
-            print(f'Map [{self.dbc_map.name}] is WMO based, skipping.')
-            return
-
-        if 'MHDR' not in token:
-            print(f'Invalid Token')
+        if error and token != 'MHDR':
+            print(f'[WARNING] Map [{self.dbc_map.name}] is WMO based, skipping.')
             return
 
         # ADT data.
@@ -91,7 +84,8 @@ class Wdt:
                 current += 1
                 tile_info: TileHeader = self.tile_information[x][y]
                 if tile_info and tile_info.size:
-                    with Adt.from_reader(tile_info, x, y, self.stream_reader) as adt:
+                    self.stream_reader.set_position(tile_info.offset)
+                    with Adt.from_reader(x, y, self.stream_reader) as adt:
                         adt.process()
                 self.progress(f'Processing ADT tiles for [{self.dbc_map.name}]...', current, total)
 
